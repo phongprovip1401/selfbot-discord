@@ -119,7 +119,7 @@ export async function execute(message, args) {
     currentChannelId = channelId;
     currentConnection = await connectToChannel(channel);
 
-    return `Đã vào kênh voice: ${channel.name} (Auto Rejoin: Bật)`;
+    return `Đã vào kênh voice: ${channel.name}`;
   } catch (error) {
     console.error('Lỗi khi join voice:', error);
     return 'Có lỗi xảy ra khi tham gia kênh voice';
