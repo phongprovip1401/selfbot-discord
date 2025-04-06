@@ -1,21 +1,44 @@
 import { Client } from 'discord.js-selfbot-v13';
 import dotenv from 'dotenv';
 import { handleCommands } from './handlers/commandHandler.mjs';
+import { readFileSync, existsSync } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const CONFIG_PATH = path.join(__dirname, 'config.json');
+
 dotenv.config();
 
 const client = new Client();
 import { handleMessage } from './commands/afk.mjs';
 client.on('messageCreate', handleMessage);
+
+// Đọc prefix từ config, mặc định là ;
+function getPrefix() {
+  if (existsSync(CONFIG_PATH)) {
+    try {
+      const config = JSON.parse(readFileSync(CONFIG_PATH, 'utf8'));
+      return config.prefix || ';';
+    } catch (err) {
+      console.error('Lỗi khi đọc prefix từ config:', err);
+      return ';';
+    }
+  }
+  return ';';
+}
+
 client.on('ready', async () => {
   console.log(`${client.user.username} is online!`);
   await handleCommands(client);
 });
 
 client.on('messageCreate', async (message) => {
-  if (!message.content.startsWith(';')) return;
+  const prefix = getPrefix();
+  if (!message.content.startsWith(prefix)) return;
   if (message.author.id !== client.user.id) return;
 
-  const args = message.content.slice(1).trim().split(/ +/);
+  const args = message.content.slice(prefix.length).trim().split(/ +/);
   const cmd = args.shift().toLowerCase();
 
   message.delete().catch(() => {});
@@ -51,8 +74,5 @@ client.on('messageCreate', async (message) => {
     }
   }
 });
-
-
-
 
 client.login(process.env.TOKEN);
