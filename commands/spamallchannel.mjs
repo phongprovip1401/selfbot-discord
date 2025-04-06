@@ -35,7 +35,7 @@ export async function execute(message, args) {
 
     for (const [_, channel] of textChannels) {
       for (let i = 0; i < count; i++) {
-        await channel.send(`\`${text}\``);
+        await channel.send(text);
         if (delay > 0) {
           await new Promise(resolve => setTimeout(resolve, delay * 1000));
         }

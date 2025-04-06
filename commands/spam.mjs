@@ -28,7 +28,7 @@ export async function execute(message, args) {
 
   try {
     for (let i = 0; i < count; i++) {
-      await message.channel.send(`\`${text}\``);
+      await message.channel.send(text);
       if (delay > 0) {
         await new Promise(resolve => setTimeout(resolve, delay * 1000));
       }
