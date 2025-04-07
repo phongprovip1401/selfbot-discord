@@ -41,6 +41,8 @@ export async function execute(message, args) {
 \`${prefix}qr edit <id bank> <số TK> <tên TK>\` - Thiết lập tài khoản ngân hàng
 \`${prefix}qr bank <số tiền> [nội dung]\` - Tạo mã QR chuyển khoản
 
+\`${prefix}purge <số lượng>\` - Xóa số lượng tin nhắn đã chỉ định của bạn
+
 \`${prefix}ping\` - Kiểm tra độ trễ của bot
 \`${prefix}uptime\` - Xem thời gian bot đã hoạt động
 \`${prefix}serverinfo\` - Xem thông tin server
