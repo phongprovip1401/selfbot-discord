@@ -48,7 +48,28 @@ export async function execute(message, args) {
 \`${prefix}serverinfo\` - Xem thông tin server
 \`${prefix}say <text>\` - Bot sẽ nói lại text của bạn
 
-*Note: Tất cả lệnh đều tự động xóa sau 15s (trừ lệnh qr bank)*`;
+*Note: Tất cả lệnh đều tự động xóa sau 15s (trừ lệnh qr bank)*
+
+🎥 **Lệnh Play Video**
+\`\`\`
+;playvideo <channel> <url>
+\`\`\`
+**Mô tả:** Phát video trong kênh voice với chất lượng cao nhất có thể
+**Tham số:**
+- \`<channel>\`: ID hoặc link kênh voice
+- \`<url>\`: Link video YouTube hoặc video trực tiếp
+
+**Tính năng:**
+- Tự động tải video YouTube với chất lượng cao nhất
+- Hỗ trợ phát video 60fps với bitrate cao
+- Tự động lưu cache video đã tải để phát lại nhanh hơn
+- Thông báo trạng thái phát video chi tiết
+- Tự động rời voice khi phát xong
+
+**Lưu ý:**
+- Cần cài đặt yt-dlp để phát video YouTube
+- Video sẽ được phát với chất lượng cao nhất có thể
+- Nếu không thể phát video YouTube, bot sẽ tự động chuyển sang video test`;
 
   const sent = await message.channel.send(helpText);
   setTimeout(() => sent.delete().catch(() => {}), 15000);

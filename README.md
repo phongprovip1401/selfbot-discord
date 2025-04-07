@@ -33,9 +33,9 @@ cd selfbot-discord
 npm install
 ```
 
-4. Tạo file `.env` và thêm token Discord của bạn:
+4. Chỉnh sửa file `.env` và thêm token Discord của bạn:
 ```
-TOKEN=token_discord_cua_ban
+DISCORD_TOKEN=token_discord_cua_ban
 OWNER_ID=id_discord_cua_ban
 ```
 
@@ -48,7 +48,7 @@ node index.mjs
 
 ## 👤 Nhà phát triển
 
-- **Tên:** phong2079  
+- **Tên:** Nguyễn Thiên Phong  
 - **Discord:** `phong2079.`  
 - **Contact:** [guns.lol/phong2079](https://guns.lol/phong2079)
 
