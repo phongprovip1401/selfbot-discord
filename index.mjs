@@ -4,6 +4,8 @@ import { handleCommands } from './handlers/commandHandler.mjs';
 import { readFileSync, existsSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
+import readline from 'readline';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = path.join(__dirname, 'config.json');
@@ -14,65 +16,132 @@ const client = new Client();
 import { handleMessage } from './commands/afk.mjs';
 client.on('messageCreate', handleMessage);
 
-// Đọc prefix từ config, mặc định là ;
-function getPrefix() {
-  if (existsSync(CONFIG_PATH)) {
-    try {
-      const config = JSON.parse(readFileSync(CONFIG_PATH, 'utf8'));
-      return config.prefix || ';';
-    } catch (err) {
-      console.error('Lỗi khi đọc prefix từ config:', err);
-      return ';';
-    }
-  }
-  return ';';
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+function askQuestion(query) {
+    return new Promise(resolve => rl.question(query, resolve));
 }
 
-client.on('ready', async () => {
-  console.log(`${client.user.username} is online!`);
-  await handleCommands(client);
-});
+async function loadConfig() {
+    console.log('Chọn một tùy chọn để khởi động bot:');
+    console.log('1. Load từ file .env');
+    console.log('2. Nhập token và owner ID rồi lưu vào file .json');
+    console.log('3. Load từ file .json');
 
-client.on('messageCreate', async (message) => {
-  const prefix = getPrefix();
-  if (!message.content.startsWith(prefix)) return;
-  if (message.author.id !== client.user.id) return;
+    const choice = await askQuestion('Nhập lựa chọn của bạn (1, 2, hoặc 3): ');
 
-  const args = message.content.slice(prefix.length).trim().split(/ +/);
-  const cmd = args.shift().toLowerCase();
+    let token, ownerId;
 
-  message.delete().catch(() => {});
-
-  if (client.commands.has(cmd)) {
-    const command = client.commands.get(cmd);
-
-    // PHÂN QUYỀN
-    const perm = command.permission || 'everyone';
-    const authorId = message.author.id;
-
-    if (perm === 'owner' && authorId !== process.env.OWNER_ID) {
-      return message.channel.send('`❌ Lệnh này chỉ dành cho chủ bot (selfbot).`')
-        .then(msg => setTimeout(() => msg.delete().catch(() => {}), 15000));
+    switch (choice.trim()) {
+        case '1':
+            dotenv.config();
+            console.log('Đã load từ file .env');
+            token = process.env.TOKEN;
+            ownerId = process.env.OWNER_ID;
+            break;
+        case '2':
+            token = await askQuestion('Nhập token: ');
+            ownerId = await askQuestion('Nhập owner ID: ');
+            const config = { token, ownerId };
+            fs.writeFileSync('config.json', JSON.stringify(config, null, 2));
+            console.log('Đã lưu thông tin vào file config.json');
+            break;
+        case '3':
+            if (fs.existsSync('config.json')) {
+                const configData = fs.readFileSync('config.json');
+                const config = JSON.parse(configData);
+                console.log('Đã load từ file config.json');
+                token = config.token;
+                ownerId = config.ownerId;
+            } else {
+                console.log('File config.json không tồn tại. Vui lòng chọn tùy chọn khác.');
+                rl.close();
+                return null;
+            }
+            break;
+        default:
+            console.log('Lựa chọn không hợp lệ. Vui lòng thử lại.');
+            rl.close();
+            return null;
     }
 
-    if (perm === 'admin') {
-      const isAdmin = message.member?.permissions?.has('Administrator') || false;
-      if (!isAdmin) {
-        return message.channel.send('`❌ Lệnh này chỉ dành cho Admin.`')
-          .then(msg => setTimeout(() => msg.delete().catch(() => {}), 15000));
-      }
+    rl.close();
+    return { token, ownerId };
+}
+
+async function startBot() {
+    const config = await loadConfig();
+    if (!config) return;
+
+    const { token, ownerId } = config;
+    console.log('Đang khởi động bot với token:', token);
+    console.log('Owner ID:', ownerId);
+
+    // Đọc prefix từ config, mặc định là ;
+    function getPrefix() {
+        if (existsSync(CONFIG_PATH)) {
+            try {
+                const config = JSON.parse(readFileSync(CONFIG_PATH, 'utf8'));
+                return config.prefix || ';';
+            } catch (err) {
+                console.error('Lỗi khi đọc prefix từ config:', err);
+                return ';';
+            }
+        }
+        return ';';
     }
 
-    try {
-      const reply = await command.execute(message, args, client);
-      if (reply && typeof reply === 'string') {
-        const sent = await message.channel.send(`\`${reply}\``);
-        setTimeout(() => sent.delete().catch(() => {}), 15000);
-      }
-    } catch (err) {
-      console.error(`Lỗi khi chạy lệnh ${cmd}:`, err);
-    }
-  }
-});
+    client.login(token);
 
-client.login(process.env.TOKEN);
+    client.on('ready', async () => {
+        console.log(`${client.user.username} is online!`);
+        await handleCommands(client);
+    });
+
+    client.on('messageCreate', async (message) => {
+        const prefix = getPrefix();
+        if (!message.content.startsWith(prefix)) return;
+        if (message.author.id !== client.user.id) return;
+
+        const args = message.content.slice(prefix.length).trim().split(/ +/);
+        const cmd = args.shift().toLowerCase();
+
+        message.delete().catch(() => {});
+
+        if (client.commands.has(cmd)) {
+            const command = client.commands.get(cmd);
+
+            // PHÂN QUYỀN
+            const perm = command.permission || 'everyone';
+            const authorId = message.author.id;
+
+            if (perm === 'owner' && authorId !== ownerId) {
+                return message.channel.send('`❌ Lệnh này chỉ dành cho chủ bot (selfbot).`')
+                    .then(msg => setTimeout(() => msg.delete().catch(() => {}), 15000));
+            }
+
+            if (perm === 'admin') {
+                const isAdmin = message.member?.permissions?.has('Administrator') || false;
+                if (!isAdmin) {
+                    return message.channel.send('`❌ Lệnh này chỉ dành cho Admin.`')
+                        .then(msg => setTimeout(() => msg.delete().catch(() => {}), 15000));
+                }
+            }
+
+            try {
+                const reply = await command.execute(message, args, client);
+                if (reply && typeof reply === 'string') {
+                    const sent = await message.channel.send(`\`${reply}\``);
+                    setTimeout(() => sent.delete().catch(() => {}), 15000);
+                }
+            } catch (err) {
+                console.error(`Lỗi khi chạy lệnh ${cmd}:`, err);
+            }
+        }
+    });
+}
+
+startBot();

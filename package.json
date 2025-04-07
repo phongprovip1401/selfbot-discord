@@ -13,6 +13,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.10.0",
     "@discordjs/voice": "^0.18.0",
+    "@distube/ytdl-core": "^4.16.8",
     "axios": "^1.8.4",
     "chalk": "^5.4.1",
     "discord.js-selfbot-v13": "^3.6.1",
