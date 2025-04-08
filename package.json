@@ -13,10 +13,12 @@
   "dependencies": {
     "@discordjs/voice": "^0.18.0",
     "axios": "^1.8.4",
+    "boxen": "^8.0.1",
     "chalk": "^5.4.1",
     "discord.js-selfbot-v13": "^3.6.1",
     "dotenv": "^16.4.7",
     "fs": "^0.0.1-security",
+    "gradient-string": "^3.0.0",
     "libsodium-wrappers": "^0.7.15",
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.48",
