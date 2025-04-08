@@ -23,7 +23,7 @@ export async function execute(message, args) {
 
     const avatarUrl = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=4096` : user.defaultAvatarURL;
     const sent = await message.channel.send(`${user.tag}\n${avatarUrl}`);
-    setTimeout(() => sent.delete().catch(() => {}), 15000);
+    setTimeout(() => sent.delete().catch(() => {}), 60000);
 
   } catch (error) {
     console.error('Lỗi khi lấy avatar:', error);

@@ -83,7 +83,7 @@ export async function execute(message) {
             setTimeout(() => {
                 message.delete().catch(() => {});
                 reply.delete().catch(() => {});
-            }, 5000);
+            }, 2000);
             return;
         }
 

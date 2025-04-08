@@ -37,7 +37,7 @@ export async function execute(message, args, client) {
         setTimeout(() => {
             message.delete().catch(() => {});
             reply.delete().catch(() => {});
-        }, 30000);
+        }, 60000);
     } catch (error) {
         console.error('Lỗi khi thực thi lệnh banner:', error);
         const reply = await message.channel.send('❌ Có lỗi xảy ra khi thực thi lệnh!');

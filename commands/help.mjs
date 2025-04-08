@@ -84,5 +84,5 @@ Prefix hiện tại: \`${prefix}\`
   setTimeout(() => {
     message.delete().catch(() => {});
     reply.delete().catch(() => {});
-  }, 15000);
+  }, 60000);
 } 
