@@ -91,7 +91,7 @@ DISCORD_TOKEN=your_token_here
 
 ### ▶️ Chạy selfbot
 ```bash
-node index.mjs
+node .
 ```
 
 ---
