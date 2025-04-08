@@ -22,45 +22,67 @@ export const name = 'help';
 export const permission = 'everyone';
 
 export async function execute(message) {
-    const prefix = message.client.prefix || ';';
-    const helpMessage = `
-**📋 Danh sách lệnh:**
+  const prefix = message.client.prefix || getPrefix();
+  const VALID_TYPES = ['PLAYING', 'STREAMING', 'LISTENING', 'WATCHING', 'CUSTOM', 'COMPETING'];
 
-**📝 Ghi chú:**
-\`${prefix}note <nội dung>\` - Thêm ghi chú mới
-\`${prefix}notes\` - Xem danh sách ghi chú
-\`${prefix}note delete <id>\` - Xóa ghi chú theo ID
+  const helpMessage = `>>> 🔧 **MILKITA SELFBOT** 🔧
+Prefix hiện tại: \`${prefix}\`
+━━━━━━━━━━━━━━━
+💤 **AFK & TỰ ĐỘNG CHAT**
+• \`${prefix}afk\` - Bật/tắt chế độ AFK
+• \`${prefix}autochat <giây> <số lần> <nội dung>\` - Lặp lại tin nhắn
+• \`${prefix}typing <delay> <nội dung>\` - Giả lập đang gõ
 
-**📊 Thống kê:**
-\`${prefix}stats\` - Xem thống kê server
-\`${prefix}stats user\` - Xem thống kê người dùng
-\`${prefix}stats channel\` - Xem thống kê kênh
+👤 **THÔNG TIN NGƯỜI DÙNG**
+• \`${prefix}avatar <tag/id>\` - Xem avatar
+• \`${prefix}banner <tag/id>\` - Xem banner
 
-**🔄 Trạng thái:**
-\`${prefix}status\` - Xem trạng thái hiện tại
-\`${prefix}status add <nội dung>\` - Thêm trạng thái mới
-\`${prefix}status delete <id>\` - Xóa trạng thái theo ID
-\`${prefix}status clear\` - Xóa tất cả trạng thái
+🔊 **VOICE & SYSTEM**
+• \`${prefix}join <tag/id/link>\` - Treo room voice
+• \`${prefix}uptime\` - Xem thời gian hoạt động
+• \`${prefix}ping\` - Xem ping
+• \`${prefix}prefix <ký tự>\` - Đổi prefix
 
-**📱 QR Code:**
-\`${prefix}qr\` - Xem danh sách tài khoản ngân hàng
-\`${prefix}qr add <bank> <stk> <name>\` - Thêm tài khoản ngân hàng
-\`${prefix}qr delete <id>\` - Xóa tài khoản theo ID
-\`${prefix}qr clear\` - Xóa tất cả tài khoản
+🧹 **TIN NHẮN**
+• \`${prefix}purge <số lượng>\` - Xóa tin nhắn
+• \`${prefix}say <nội dung>\` - Gửi tin nhắn
+• \`${prefix}snipe\` - Xem tin nhắn đã xóa
+• \`${prefix}spam <số lượng> <delay> <nội dung>\` - Spam
+• \`${prefix}spamallchannel <số lượng> <delay> <nội dung>\` - Spam toàn server
 
-**🔍 Tin nhắn:**
-\`${prefix}snipe\` - Xem tin nhắn đã xóa gần đây
-\`${prefix}afk <lý do>\` - Bật chế độ AFK
-\`${prefix}afk off\` - Tắt chế độ AFK
+📒 **NOTE**
+• \`${prefix}note <nội dung>\` - Lưu ghi chú
+• \`${prefix}note list\` - Xem danh sách
+• \`${prefix}note delete <id>\` - Xóa ghi chú
 
-**⚙️ Cài đặt:**
-\`${prefix}prefix <prefix mới>\` - Đổi prefix
-\`${prefix}help\` - Xem danh sách lệnh
-`;
+🏦 **QR BANKING**
+• \`${prefix}qr id <ngân hàng>\` - Tìm ID ngân hàng
+• \`${prefix}qr edit <id> <số TK> <chủ TK>\` - Thêm thông tin
+• \`${prefix}qr bank <số tiền> <nội dung>\` - Tạo mã QR
+• \`${prefix}qr clear\` - Xóa ngân hàng
 
-    const reply = await message.channel.send(helpMessage);
-    setTimeout(() => {
-        message.delete().catch(() => {});
-        reply.delete().catch(() => {});
-    }, 15000);
+📊 **THÔNG TIN SERVER**
+• \`${prefix}serverinfo\` - Xem thông tin
+• \`${prefix}phantich\` - Phân tích quyền
+
+💻 **TRẠNG THÁI DISCORD**
+• \`${prefix}status on/off\` - Bật/tắt trạng thái
+📌 Tùy chỉnh status:
+• \`app_name\`: Tên ứng dụng
+• \`type\`: Loại hoạt động (${VALID_TYPES.join(', ')})
+• \`large_image\`, \`small_image\`: Ảnh
+• \`details\`: Ghi chú
+• \`timestamp\`: \`true\`, \`false\`, hoặc số giây
+
+📝 Ví dụ:
+\`${prefix}status edit app_name My Game\`
+\`${prefix}status edit type PLAYING\`
+\`${prefix}status edit details "Đang chơi game"\`
+━━━━━━━━━━━━━━━`;
+
+  const reply = await message.channel.send(helpMessage);
+  setTimeout(() => {
+    message.delete().catch(() => {});
+    reply.delete().catch(() => {});
+  }, 15000);
 } 

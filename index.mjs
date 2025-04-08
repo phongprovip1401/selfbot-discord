@@ -146,7 +146,7 @@ async function startBot() {
 
         const { token } = config;
         if (!token) {
-            console.log(chalk.red('❌ Token không hợp lệ!'));
+            console.log(chalk.red('❌ Token không hợp lệ, vui lòng kiểm tra lại!'));
             process.exit(1);
         }
 
