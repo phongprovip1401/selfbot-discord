@@ -33,10 +33,9 @@ cd selfbot-discord
 npm install
 ```
 
-4. Chỉnh sửa file `.env` và thêm token Discord của bạn:
+4. Chỉnh sửa file `.env` và thêm token Discord của bạn (có thể bỏ qua bước này nếu muốn nhập token trên cmd):
 ```
 DISCORD_TOKEN=token_discord_cua_ban
-OWNER_ID=id_discord_cua_ban
 ```
 
 5. Khởi động selfbot:
