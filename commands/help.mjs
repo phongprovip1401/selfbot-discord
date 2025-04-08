@@ -23,33 +23,37 @@ export const permission = 'everyone';
 
 export async function execute(message, args) {
   const prefix = getPrefix();
-  const helpText = `**Danh sách lệnh: (prefix hiện tại: ${prefix})**
+  const helpText = `
+\`\`\`
+📝 Danh sách lệnh:
 
-\`${prefix}join <link/tag/id voice>\` - Vào kênh voice (tự động rejoin khi bị kick)
-\`${prefix}join\` - Out khỏi kênh voice nếu đang trong kênh
+1. ${prefix}help - Hiển thị danh sách lệnh
+2. ${prefix}ping - Kiểm tra độ trễ
+3. ${prefix}uptime - Xem thời gian hoạt động
+4. ${prefix}avatar - Xem avatar của bạn
+5. ${prefix}serverinfo - Xem thông tin server
+6. ${prefix}status - Quản lý trạng thái
+7. ${prefix}typing - Bật/tắt chế độ đang gõ
+8. ${prefix}purge <số> - Xóa tin nhắn
+9. ${prefix}spam <số> <tin nhắn> - Spam tin nhắn
+10. ${prefix}say <tin nhắn> - Gửi tin nhắn
+11. ${prefix}phantich - Phân tích tin nhắn
+12. ${prefix}qr - Quản lý QR code
+13. ${prefix}join - Tham gia voice channel
+14. ${prefix}afk - Bật/tắt chế độ AFK
 
-\`${prefix}avatar <id/tag>\` - Xem avatar của người dùng
-\`${prefix}avatar @user\` - Xem avatar của người được tag
+📌 Quản lý ghi chú:
+15. ${prefix}note <nội dung> - Thêm ghi chú mới
+16. ${prefix}notes - Xem danh sách ghi chú
+17. ${prefix}note delete <id> - Xóa ghi chú
 
-\`${prefix}boom <id/tag>\` - Spam chửi người dùng trong kênh hiện tại
-\`${prefix}boom\` - Dừng spam chửi
+💡 Lưu ý: Tất cả tin nhắn sẽ tự động xóa sau 5 giây
+\`\`\`
+`;
 
-\`${prefix}boom2 <id/tag>\` - Spam chửi người dùng random khắp các kênh
-\`${prefix}boom2\` - Dừng spam chửi
-
-\`${prefix}qr id <từ khóa>\` - Tìm kiếm ID ngân hàng (VD: ${prefix}qr id mb)
-\`${prefix}qr edit <id bank> <số TK> <tên TK>\` - Thiết lập tài khoản ngân hàng
-\`${prefix}qr bank <số tiền> [nội dung]\` - Tạo mã QR chuyển khoản
-
-\`${prefix}purge <số lượng>\` - Xóa số lượng tin nhắn đã chỉ định của bạn
-
-\`${prefix}ping\` - Kiểm tra độ trễ của bot
-\`${prefix}uptime\` - Xem thời gian bot đã hoạt động
-\`${prefix}serverinfo\` - Xem thông tin server
-\`${prefix}say <text>\` - Bot sẽ nói lại text của bạn
-
-*Note: Tất cả lệnh đều tự động xóa sau 15s (trừ lệnh qr bank)*`;
-
-  const sent = await message.channel.send(helpText);
-  setTimeout(() => sent.delete().catch(() => {}), 60000);
+  const reply = await message.channel.send(helpText);
+  setTimeout(() => {
+    message.delete().catch(() => {});
+    reply.delete().catch(() => {});
+  }, 30000);
 } 

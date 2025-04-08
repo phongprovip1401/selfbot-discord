@@ -6,6 +6,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import readline from 'readline';
+import { handleMessage as handleAFKMessage } from './commands/afk.mjs';
+import { handleMessage } from './handlers/messageHandler.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = path.join(__dirname, 'config.json');
@@ -13,8 +15,6 @@ const CONFIG_PATH = path.join(__dirname, 'config.json');
 dotenv.config();
 
 const client = new Client();
-import { handleMessage } from './commands/afk.mjs';
-client.on('messageCreate', handleMessage);
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -133,6 +133,9 @@ async function startBot() {
             }
         }
     });
+
+    client.on('messageCreate', handleAFKMessage);
+    handleMessage(client);
 }
 
 startBot();
