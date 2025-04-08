@@ -1,7 +1,7 @@
 
 # 🌟 MILKITA - Discord Selfbot
 
-> Một selfbot hiện đại dành cho Discord, phát triển bởi [@phong2079](https://github.com/phong2079) với sự hỗ trợ của AI.  
+> Một selfbot hiện đại dành cho Discord, phát triển bởi [@phong2079](https://github.com/phongprovip1401) với sự hỗ trợ của AI.  
 > Hỗ trợ nhiều tính năng tiện lợi, giao diện thân thiện và dễ sử dụng.
 
 ---

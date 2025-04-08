@@ -16,16 +16,12 @@ import handleMessageUpdate from './handlers/messageUpdate.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = path.join(__dirname, 'config.json');
-
-// Define the path to the commands directory
 const commandsPath = path.join(__dirname, 'commands');
 
 dotenv.config();
 
-// Tạo gradient text
 const gradientText = gradient('cyan', 'pink');
 
-// Tạo boxen options
 const boxenOptions = {
     padding: 1,
     margin: 1,
@@ -36,7 +32,6 @@ const boxenOptions = {
     titleAlignment: 'center'
 };
 
-// Tạo welcome message
 const welcomeMessage = boxen(
     gradientText(`
     ███╗   ███╗██╗██╗     ██╗██╗  ██╗██╗████████╗ █████╗ 
@@ -66,7 +61,7 @@ const welcomeMessage = boxen(
 );
 
 const client = new Client();
-client.commands = new Map(); // Khởi tạo commands Collection
+client.commands = new Map();
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -77,7 +72,6 @@ function askQuestion(query) {
     return new Promise(resolve => rl.question(query, resolve));
 }
 
-// Đọc prefix từ config
 function getPrefix() {
     if (existsSync(CONFIG_PATH)) {
         try {
@@ -136,11 +130,9 @@ async function loadConfig() {
 
 async function startBot() {
     try {
-        // Hiển thị welcome message
         console.clear();
         console.log(welcomeMessage);
 
-        // Load config
         const config = await loadConfig();
         if (!config) return;
 
@@ -150,12 +142,10 @@ async function startBot() {
             process.exit(1);
         }
 
-        // Đăng nhập
         console.log(chalk.cyan('\n🔐 Đang đăng nhập...'));
         await client.login(token);
         console.log(chalk.green('✅ Đăng nhập thành công!'));
         
-        // Tải lệnh
         const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.mjs'));
         let loadedCommands = 0;
         let failedCommands = 0;
@@ -179,14 +169,12 @@ async function startBot() {
             console.log(`⚠️ Đã tải ${loadedCommands} lệnh, ${failedCommands} lệnh thất bại!`);
         }
         
-        // Hiển thị thông tin bot
         console.log(chalk.cyan('\n🤖 Thông tin selfbot:'));
         console.log(chalk.cyan(`• Username: ${client.user.username}`));
         console.log(chalk.cyan(`• ID: ${client.user.id}`));
         console.log(chalk.cyan(`• Prefix hiện tại: ${getPrefix()}`));
         console.log(chalk.cyan(`• Số server đang ở: ${client.guilds.cache.size}`));
 
-        // Hỏi người dùng có muốn hiển thị messageHandler không
         const showLogs = await askQuestion(chalk.yellow('\nBạn có muốn hiển thị tất cả tin nhắn trong console và lưu vào log không? (y/n): '));
         if (showLogs.toLowerCase() === 'y') {
             console.log(chalk.green('✅ Đã bật hiển thị tin nhắn'));
@@ -198,12 +186,10 @@ async function startBot() {
         
         console.log(chalk.green('\n✨ Bot đã sẵn sàng!'));
 
-        // Đăng ký event handlers
         client.on('messageCreate', handleMessage);
         client.on('messageDelete', handleMessageDelete);
         client.on('messageUpdate', handleMessageUpdate);
 
-        // Xử lý sự kiện message
         client.on('messageCreate', async (message) => {
             const prefix = getPrefix();
             if (!message.content.startsWith(prefix)) return;
@@ -217,7 +203,6 @@ async function startBot() {
             if (client.commands.has(cmd)) {
                 const command = client.commands.get(cmd);
 
-                // PHÂN QUYỀN
                 const perm = command.permission || 'everyone';
                 const authorId = message.author.id;
 
@@ -241,7 +226,6 @@ async function startBot() {
             }
         });
 
-        // Xử lý sự kiện AFK
         client.on('messageCreate', handleAFKMessage);
 
     } catch (error) {
