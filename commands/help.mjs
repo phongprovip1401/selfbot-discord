@@ -21,39 +21,46 @@ function getPrefix() {
 export const name = 'help';
 export const permission = 'everyone';
 
-export async function execute(message, args) {
-  const prefix = getPrefix();
-  const helpText = `
-\`\`\`
-📝 Danh sách lệnh:
+export async function execute(message) {
+    const prefix = message.client.prefix || ';';
+    const helpMessage = `
+**📋 Danh sách lệnh:**
 
-1. ${prefix}help - Hiển thị danh sách lệnh
-2. ${prefix}ping - Kiểm tra độ trễ
-3. ${prefix}uptime - Xem thời gian hoạt động
-4. ${prefix}avatar - Xem avatar của bạn
-5. ${prefix}serverinfo - Xem thông tin server
-6. ${prefix}status - Quản lý trạng thái
-7. ${prefix}typing - Bật/tắt chế độ đang gõ
-8. ${prefix}purge <số> - Xóa tin nhắn
-9. ${prefix}spam <số> <tin nhắn> - Spam tin nhắn
-10. ${prefix}say <tin nhắn> - Gửi tin nhắn
-11. ${prefix}phantich - Phân tích tin nhắn
-12. ${prefix}qr - Quản lý QR code
-13. ${prefix}join - Tham gia voice channel
-14. ${prefix}afk - Bật/tắt chế độ AFK
+**📝 Ghi chú:**
+\`${prefix}note <nội dung>\` - Thêm ghi chú mới
+\`${prefix}notes\` - Xem danh sách ghi chú
+\`${prefix}note delete <id>\` - Xóa ghi chú theo ID
 
-📌 Quản lý ghi chú:
-15. ${prefix}note <nội dung> - Thêm ghi chú mới
-16. ${prefix}notes - Xem danh sách ghi chú
-17. ${prefix}note delete <id> - Xóa ghi chú
+**📊 Thống kê:**
+\`${prefix}stats\` - Xem thống kê server
+\`${prefix}stats user\` - Xem thống kê người dùng
+\`${prefix}stats channel\` - Xem thống kê kênh
 
-💡 Lưu ý: Tất cả tin nhắn sẽ tự động xóa sau 5 giây
-\`\`\`
+**🔄 Trạng thái:**
+\`${prefix}status\` - Xem trạng thái hiện tại
+\`${prefix}status add <nội dung>\` - Thêm trạng thái mới
+\`${prefix}status delete <id>\` - Xóa trạng thái theo ID
+\`${prefix}status clear\` - Xóa tất cả trạng thái
+
+**📱 QR Code:**
+\`${prefix}qr\` - Xem danh sách tài khoản ngân hàng
+\`${prefix}qr add <bank> <stk> <name>\` - Thêm tài khoản ngân hàng
+\`${prefix}qr delete <id>\` - Xóa tài khoản theo ID
+\`${prefix}qr clear\` - Xóa tất cả tài khoản
+
+**🔍 Tin nhắn:**
+\`${prefix}snipe\` - Xem tin nhắn đã xóa gần đây
+\`${prefix}afk <lý do>\` - Bật chế độ AFK
+\`${prefix}afk off\` - Tắt chế độ AFK
+
+**⚙️ Cài đặt:**
+\`${prefix}prefix <prefix mới>\` - Đổi prefix
+\`${prefix}help\` - Xem danh sách lệnh
 `;
 
-  const reply = await message.channel.send(helpText);
-  setTimeout(() => {
-    message.delete().catch(() => {});
-    reply.delete().catch(() => {});
-  }, 30000);
+    const reply = await message.channel.send(helpMessage);
+    setTimeout(() => {
+        message.delete().catch(() => {});
+        reply.delete().catch(() => {});
+    }, 15000);
 } 

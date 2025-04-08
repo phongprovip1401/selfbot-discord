@@ -1,58 +1,42 @@
 import chalk from 'chalk';
-import moment from 'moment-timezone';
+import moment from 'moment';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const LOG_DIR = path.join(__dirname, 'logs');
-const LOG_FILE = path.join(LOG_DIR, `${moment().format('YYYY-MM-DD')}.log`);
+const LOGS_DIR = path.join(__dirname, '../logs');
 
-// Tạo thư mục logs nếu chưa tồn tại
-if (!fs.existsSync(LOG_DIR)) {
-    fs.mkdirSync(LOG_DIR);
+// Đảm bảo thư mục logs tồn tại
+if (!fs.existsSync(LOGS_DIR)) {
+    fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// Tạo writeStream với append mode
-const logStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
-
-export function handleMessage(client) {
-    client.on('messageCreate', async (message) => {
-        // Kiểm tra xem có nên hiển thị tin nhắn không
-        if (process.env.SHOW_MESSAGE_HANDLER !== 'true') return;
+export default function handleMessage(message) {
+    try {
+        // Bỏ qua nếu không có thông tin tin nhắn
+        if (!message) return;
 
         // Bỏ qua tin nhắn của bot
-        if (message.author.id === client.user.id) return;
+        if (message.author.bot) return;
 
         // Lấy thời gian hiện tại
-        const time = moment().tz('Asia/Ho_Chi_Minh').format('HH:mm:ss');
+        const now = moment();
+        const time = now.format('HH:mm:ss');
+        const date = now.format('YYYY-MM-DD');
+        const logFile = path.join(LOGS_DIR, `${date}.txt`);
 
-        // Lấy tên server và kênh
-        const serverName = message.guild ? message.guild.name : 'DM';
-        const channelName = message.channel.name || 'Direct Message';
-        const username = message.author.username;
-        const text = message.content;
+        // Format tin nhắn
+        const formattedMessage = `[${time}][${message.guild?.name || 'DM'}][${message.channel.name}][${message.author.username} (${message.author.id})]: ${message.content || 'No content'}`;
 
-        // Tạo chuỗi log với màu sắc cho console
-        const consoleLog = [
-            chalk.gray(`[${time}]`),
-            chalk.blue(`[${serverName}]`),
-            chalk.green(`[${channelName}]`),
-            chalk.yellow(`${username}:`),
-            chalk.white(text)
-        ].join(' ');
+        // Ghi vào file log
+        fs.appendFileSync(logFile, formattedMessage + '\n');
 
-        // Tạo chuỗi log cho file (không có màu)
-        const fileLog = `[${time}][${serverName}][${channelName}][${username}]: ${text}\n`;
-
-        // Hiển thị lên console
-        console.log(consoleLog);
-
-        // Ghi vào file
-        logStream.write(fileLog, (err) => {
-            if (err) {
-                console.error('Lỗi khi ghi log:', err);
-            }
-        });
-    });
+        // Hiển thị trong console nếu được bật
+        if (process.env.SHOW_MESSAGE_HANDLER === 'true') {
+            console.log(chalk.green(formattedMessage));
+        }
+    } catch (error) {
+        console.error('Lỗi khi xử lý tin nhắn:', error);
+    }
 } 

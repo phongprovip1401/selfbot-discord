@@ -45,7 +45,7 @@ export const execute = async (message, args) => {
     const prefix = getPrefix();
     
     if (args.length === 0) {
-        const reply = await message.channel.send(`Vui lòng sử dụng:\n${prefix}note <nội dung> - Thêm ghi chú\n${prefix}note notes - Xem tất cả ghi chú\n${prefix}note delete <id> - Xóa ghi chú`);
+        const reply = await message.channel.send(`Vui lòng sử dụng:\n${prefix}note <nội dung> - Thêm ghi chú\n${prefix}note list - Xem tất cả ghi chú\n${prefix}note delete <id> - Xóa ghi chú`);
         setTimeout(() => {
             message.delete().catch(() => {});
             reply.delete().catch(() => {});
@@ -95,7 +95,7 @@ export const execute = async (message, args) => {
         return;
     }
 
-    if (subCommand === 'notes') {
+    if (subCommand === 'list') {
         const notes = getNotes();
         if (notes.length === 0) {
             const reply = await message.channel.send('Chưa có ghi chú nào');

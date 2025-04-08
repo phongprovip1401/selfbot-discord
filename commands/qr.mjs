@@ -8,12 +8,27 @@ const BANKS_PATH = path.join(__dirname, '../banks.json');
 const USER_BANKS_PATH = path.join(__dirname, '../userbanks.json');
 const BANKS_PER_PAGE = 15;
 
+// Đảm bảo file userbanks.json tồn tại và có cấu trúc đúng
+try {
+    const data = readFileSync(USER_BANKS_PATH, 'utf8');
+    if (!data) {
+        writeFileSync(USER_BANKS_PATH, JSON.stringify({ accounts: {} }, null, 2));
+    } else {
+        const parsed = JSON.parse(data);
+        if (!parsed.accounts) {
+            writeFileSync(USER_BANKS_PATH, JSON.stringify({ accounts: {} }, null, 2));
+        }
+    }
+} catch (err) {
+    writeFileSync(USER_BANKS_PATH, JSON.stringify({ accounts: {} }, null, 2));
+}
+
 export const name = 'qr';
 export const permission = 'everyone';
 
 export async function execute(message, args) {
     if (!args.length) {
-        return '❌ Vui lòng nhập option! Ví dụ:\n;qr id <từ khóa>\n;qr edit <id bank> <số tài khoản> <tên chủ tài khoản>\n;qr bank <số tiền> [nội dung]';
+        return '❌ Vui lòng nhập option! Ví dụ:\n;qr id <từ khóa>\n;qr edit <id bank> <số tài khoản> <tên chủ tài khoản>\n;qr bank <số tiền> [nội dung]\n;qr clear | xóa tài khoản ngân hàng hiện tại';
     }
 
     const option = args[0].toLowerCase();
@@ -63,7 +78,20 @@ export async function execute(message, args) {
 
         try {
             // Đọc thông tin tài khoản của user
-            const userBanksData = JSON.parse(readFileSync(USER_BANKS_PATH, 'utf8'));
+            let userBanksData = { accounts: {} };
+            try {
+                const data = readFileSync(USER_BANKS_PATH, 'utf8');
+                if (data) {
+                    userBanksData = JSON.parse(data);
+                    if (!userBanksData.accounts) {
+                        userBanksData.accounts = {};
+                    }
+                }
+            } catch (err) {
+                // Nếu file không tồn tại hoặc lỗi, tạo cấu trúc mới
+                userBanksData = { accounts: {} };
+            }
+
             const userId = message.author.id;
             const userAccount = userBanksData.accounts[userId];
 
@@ -111,6 +139,26 @@ export async function execute(message, args) {
             return '❌ Có lỗi xảy ra khi lấy thông tin tài khoản!';
         }
     }
+    if (option === 'clear') {
+        try {
+            // Reset file về cấu trúc ban đầu
+            writeFileSync(USER_BANKS_PATH, JSON.stringify({ accounts: {} }, null, 2));
+            const reply = await message.channel.send('✅ Đã xóa tất cả tài khoản và reset file về trạng thái ban đầu');
+            setTimeout(() => {
+                message.delete().catch(() => {});
+                reply.delete().catch(() => {});
+            }, 5000);
+            return;
+        } catch (err) {
+            console.error('Lỗi khi xóa tài khoản:', err);
+            const reply = await message.channel.send('❌ Có lỗi xảy ra khi xóa tài khoản!');
+            setTimeout(() => {
+                message.delete().catch(() => {});
+                reply.delete().catch(() => {});
+            }, 5000);
+            return;
+        }
+    }
 
     if (option === 'edit') {
         // Kiểm tra đủ tham số
@@ -133,10 +181,17 @@ export async function execute(message, args) {
             }
 
             // Đọc dữ liệu tài khoản người dùng
-            let userBanksData = {};
+            let userBanksData = { accounts: {} };
             try {
-                userBanksData = JSON.parse(readFileSync(USER_BANKS_PATH, 'utf8'));
+                const data = readFileSync(USER_BANKS_PATH, 'utf8');
+                if (data) {
+                    userBanksData = JSON.parse(data);
+                    if (!userBanksData.accounts) {
+                        userBanksData.accounts = {};
+                    }
+                }
             } catch (err) {
+                // Nếu file không tồn tại hoặc lỗi, tạo cấu trúc mới
                 userBanksData = { accounts: {} };
             }
 
@@ -154,13 +209,29 @@ export async function execute(message, args) {
             };
 
             // Lưu vào file
-            writeFileSync(USER_BANKS_PATH, JSON.stringify(userBanksData, null, 2));
+            try {
+                writeFileSync(USER_BANKS_PATH, JSON.stringify(userBanksData, null, 2));
+                //console.log('Đã lưu vào file:', userBanksData); // Thêm log để kiểm tra
+            } catch (err) {
+                console.error('Lỗi khi lưu file:', err);
+                throw err;
+            }
 
-            return `✅ Đã ${isUpdate ? 'cập nhật' : 'thêm'} tài khoản:\nNgân hàng: ${bank.shortName}\nSố TK: ${accountNumber}\nTên TK: ${accountName}`;
+            const reply = await message.channel.send(`✅ Đã ${isUpdate ? 'cập nhật' : 'thêm'} tài khoản:\nNgân hàng: ${bank.shortName}\nSố TK: ${accountNumber}\nTên TK: ${accountName}`);
+            setTimeout(() => {
+                message.delete().catch(() => {});
+                reply.delete().catch(() => {});
+            }, 5000);
+            return;
 
         } catch (err) {
             console.error('Lỗi khi lưu thông tin tài khoản:', err);
-            return '❌ Có lỗi xảy ra khi lưu thông tin tài khoản!';
+            const reply = await message.channel.send('❌ Có lỗi xảy ra khi lưu thông tin tài khoản!');
+            setTimeout(() => {
+                message.delete().catch(() => {});
+                reply.delete().catch(() => {});
+            }, 5000);
+            return;
         }
     }
 

@@ -7,13 +7,18 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import readline from 'readline';
 import { handleMessage as handleAFKMessage } from './commands/afk.mjs';
-import { handleMessage } from './handlers/messageHandler.mjs';
+import handleMessage from './handlers/messageHandler.mjs';
 import chalk from 'chalk';
 import boxen from 'boxen';
 import gradient from 'gradient-string';
+import handleMessageDelete from './handlers/messageDelete.mjs';
+import handleMessageUpdate from './handlers/messageUpdate.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = path.join(__dirname, 'config.json');
+
+// Define the path to the commands directory
+const commandsPath = path.join(__dirname, 'commands');
 
 dotenv.config();
 
@@ -44,8 +49,9 @@ const welcomeMessage = boxen(
     chalk.cyan(`
     Version: 1.0.0
     Author: Nguyễn Thiên Phong (@phong2079)
+    Discord: phong2079.
     Description: Một selfbot tùy chỉnh cho Discord, 
-    được phát triển bởi phong2079 với sự hỗ trợ của AI gồm nhiều tính năng 
+    được phát triển bởi phong2079 gồm nhiều tính năng 
     hiện đại và tiện lợi, sử dụng thư viện discord.js-selfbot-v13
     
     `) +
@@ -60,6 +66,7 @@ const welcomeMessage = boxen(
 );
 
 const client = new Client();
+client.commands = new Map(); // Khởi tạo commands Collection
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -149,18 +156,38 @@ async function startBot() {
         console.log(chalk.green('✅ Đăng nhập thành công!'));
         
         // Tải lệnh
-        await handleCommands(client);
-        console.log(chalk.green('✅ Đã tải xong tất cả lệnh!'));
+        const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.mjs'));
+        let loadedCommands = 0;
+        let failedCommands = 0;
+
+        for (const file of commandFiles) {
+            try {
+                const filePath = path.join(commandsPath, file);
+                const fileUrl = new URL(`file://${filePath.replace(/\\/g, '/')}`).href;
+                const command = await import(fileUrl);
+                client.commands.set(command.name, command);
+                loadedCommands++;
+            } catch (error) {
+                console.error(`Lỗi khi tải lệnh ${file}:`, error);
+                failedCommands++;
+            }
+        }
+
+        if (failedCommands === 0) {
+            console.log(`✅ Đã tải thành công ${loadedCommands} lệnh!`);
+        } else {
+            console.log(`⚠️ Đã tải ${loadedCommands} lệnh, ${failedCommands} lệnh thất bại!`);
+        }
         
         // Hiển thị thông tin bot
-        console.log(chalk.cyan('\n🤖 Thông tin bot:'));
-        console.log(chalk.cyan(`• Tên: ${client.user.username}`));
+        console.log(chalk.cyan('\n🤖 Thông tin selfbot:'));
+        console.log(chalk.cyan(`• Username: ${client.user.username}`));
         console.log(chalk.cyan(`• ID: ${client.user.id}`));
-        console.log(chalk.cyan(`• Prefix: ${getPrefix()}`));
-        console.log(chalk.cyan(`• Số server: ${client.guilds.cache.size}`));
+        console.log(chalk.cyan(`• Prefix hiện tại: ${getPrefix()}`));
+        console.log(chalk.cyan(`• Số server đang ở: ${client.guilds.cache.size}`));
 
         // Hỏi người dùng có muốn hiển thị messageHandler không
-        const showLogs = await askQuestion(chalk.yellow('\nBạn có muốn hiển thị tất cả tin nhắn trong console không? (y/n): '));
+        const showLogs = await askQuestion(chalk.yellow('\nBạn có muốn hiển thị tất cả tin nhắn trong console và lưu vào log không? (y/n): '));
         if (showLogs.toLowerCase() === 'y') {
             console.log(chalk.green('✅ Đã bật hiển thị tin nhắn'));
             process.env.SHOW_MESSAGE_HANDLER = 'true';
@@ -170,6 +197,11 @@ async function startBot() {
         }
         
         console.log(chalk.green('\n✨ Bot đã sẵn sàng!'));
+
+        // Đăng ký event handlers
+        client.on('messageCreate', handleMessage);
+        client.on('messageDelete', handleMessageDelete);
+        client.on('messageUpdate', handleMessageUpdate);
 
         // Xử lý sự kiện message
         client.on('messageCreate', async (message) => {
@@ -211,9 +243,6 @@ async function startBot() {
 
         // Xử lý sự kiện AFK
         client.on('messageCreate', handleAFKMessage);
-        
-        // Xử lý tin nhắn thông thường
-        handleMessage(client);
 
     } catch (error) {
         console.log(chalk.red(`\n❌ Lỗi khi đăng nhập: ${error.message}`));
