@@ -28,24 +28,22 @@ function askQuestion(query) {
 async function loadConfig() {
     console.log('Chọn một tùy chọn để khởi động bot:');
     console.log('1. Load từ file .env');
-    console.log('2. Nhập token và owner ID rồi lưu vào file .json');
+    console.log('2. Nhập token rồi lưu vào file .json');
     console.log('3. Load từ file .json');
 
     const choice = await askQuestion('Nhập lựa chọn của bạn (1, 2, hoặc 3): ');
 
-    let token, ownerId;
+    let token;
 
     switch (choice.trim()) {
         case '1':
             dotenv.config();
             console.log('Đã load từ file .env');
             token = process.env.TOKEN;
-            ownerId = process.env.OWNER_ID;
             break;
         case '2':
             token = await askQuestion('Nhập token: ');
-            ownerId = await askQuestion('Nhập owner ID: ');
-            const config = { token, ownerId };
+            const config = { token };
             fs.writeFileSync('config.json', JSON.stringify(config, null, 2));
             console.log('Đã lưu thông tin vào file config.json');
             break;
@@ -55,7 +53,6 @@ async function loadConfig() {
                 const config = JSON.parse(configData);
                 console.log('Đã load từ file config.json');
                 token = config.token;
-                ownerId = config.ownerId;
             } else {
                 console.log('File config.json không tồn tại. Vui lòng chọn tùy chọn khác.');
                 rl.close();
@@ -69,16 +66,15 @@ async function loadConfig() {
     }
 
     rl.close();
-    return { token, ownerId };
+    return { token };
 }
 
 async function startBot() {
     const config = await loadConfig();
     if (!config) return;
 
-    const { token, ownerId } = config;
+    const { token } = config;
     console.log('Đang khởi động bot với token:', token);
-    console.log('Owner ID:', ownerId);
 
     // Đọc prefix từ config, mặc định là ;
     function getPrefix() {
@@ -117,11 +113,6 @@ async function startBot() {
             // PHÂN QUYỀN
             const perm = command.permission || 'everyone';
             const authorId = message.author.id;
-
-            if (perm === 'owner' && authorId !== ownerId) {
-                return message.channel.send('`❌ Lệnh này chỉ dành cho chủ bot (selfbot).`')
-                    .then(msg => setTimeout(() => msg.delete().catch(() => {}), 15000));
-            }
 
             if (perm === 'admin') {
                 const isAdmin = message.member?.permissions?.has('Administrator') || false;
