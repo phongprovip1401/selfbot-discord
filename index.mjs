@@ -13,6 +13,7 @@ import boxen from 'boxen';
 import gradient from 'gradient-string';
 import handleMessageDelete from './handlers/messageDelete.mjs';
 import handleMessageUpdate from './handlers/messageUpdate.mjs';
+import { startDashboard } from './dashboard/server.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = path.join(__dirname, 'config.json');
@@ -62,6 +63,8 @@ const welcomeMessage = boxen(
 
 const client = new Client();
 client.commands = new Map();
+
+export { client };
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -145,6 +148,9 @@ async function startBot() {
         console.log(chalk.cyan('\n🔐 Đang đăng nhập...'));
         await client.login(token);
         console.log(chalk.green('✅ Đăng nhập thành công!'));
+        
+        // Start the dashboard server
+        startDashboard();
         
         const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.mjs'));
         let loadedCommands = 0;

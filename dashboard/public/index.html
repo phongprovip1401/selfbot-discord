@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MILKITA Selfbot Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #f472b6; /* hồng nhạt */
+            --secondary-color: #fce7f3; /* nền hồng nhạt */
+            --card-bg: #fff;
+            --input-bg: #fdf2f8;
+            --text-color: #22223b;
+            --border-color: #f472b6;
+        }
+        body {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background: var(--card-bg);
+            box-shadow: 0 2px 4px rgba(244,114,182,0.08);
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(244,114,182,0.08);
+        }
+        .card-header {
+            background: rgba(244,114,182,0.08);
+            border-bottom: none;
+            border-radius: 16px 16px 0 0 !important;
+        }
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #b18597;
+            font-size: 0.9rem;
+        }
+        .form-label {
+            color: #b18597;
+            font-weight: 500;
+        }
+        .bank-select {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 10px;
+        }
+        .bank-select:focus {
+            box-shadow: 0 0 0 0.15rem var(--primary-color);
+        }
+        .editable-field, .editable-input {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border-radius: 10px;
+            padding: 0 16px;
+            font-size: 1.1rem;
+            border: 1px solid transparent;
+            transition: border 0.2s, background 0.2s;
+        }
+        .editable-field {
+            cursor: pointer;
+        }
+        .editable-field:hover {
+            border: 1px solid var(--primary-color);
+            background: #fff0f6;
+        }
+        .editable-input {
+            width: 100%;
+            border: 1px solid var(--primary-color);
+            background: #fff;
+            outline: none;
+        }
+        .toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            min-width: 200px;
+            background: var(--primary-color);
+            color: #fff;
+            border-radius: 8px;
+            padding: 12px 24px;
+            box-shadow: 0 2px 8px rgba(244,114,182,0.15);
+            opacity: 0.95;
+            font-weight: 500;
+            display: none;
+        }
+        .btn-outline-pink {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background: #fff;
+        }
+        .btn-outline-pink:hover, .btn-outline-pink:focus {
+            background: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+        #preview-large-image img, #preview-small-image img {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            border: 1px solid #f472b6;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast -->
+    <div id="toast" class="toast">Đã lưu thành công!</div>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg mb-4">
+        <div class="container">
+            <a class="navbar-brand" style="color:var(--primary-color);font-weight:bold;" href="#">
+                <i class="bi bi-robot"></i> MILKITA Selfbot
+            </a>
+            <div class="d-flex align-items-center position-relative">
+                <span id="bot-status" class="badge rounded-pill px-3 py-2 me-2 bg-warning text-dark status-badge" style="cursor:pointer;user-select:none;" onclick="toggleStatusDropdown()">Loading...</span>
+                <div id="status-dropdown" class="dropdown-menu" style="min-width:120px;display:none;position:absolute;top:110%;right:0;">
+                    <button class="dropdown-item" onclick="changeStatus('online')"><span class="badge bg-success">Online</span></button>
+                    <button class="dropdown-item" onclick="changeStatus('idle')"><span class="badge bg-warning text-dark">Idle</span></button>
+                    <button class="dropdown-item" onclick="changeStatus('dnd')"><span class="badge bg-danger">Do Not Disturb</span></button>
+                    <button class="dropdown-item" onclick="changeStatus('invisible')"><span class="badge bg-secondary">Invisible</span></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <!-- Bot Info Card -->
+        <div class="card stat-card w-100 text-center mb-4 p-4" style="position:relative;">
+            <div class="d-flex flex-column align-items-center justify-content-center">
+                <img id="bot-avatar" src="" alt="Avatar" class="rounded-circle mb-2" style="width:90px;height:90px;object-fit:cover;border:3px solid #f472b6;box-shadow:0 2px 8px #f472b633;">
+                <div class="stat-value" id="bot-username">Loading...</div>
+                <div class="stat-label" id="bot-tag">#0000</div>
+                <span class="badge bg-light text-dark mt-2" id="bot-custom-status" style="display:none;"></span>
+            </div>
+            <div class="row mt-3 g-2 justify-content-center">
+                <div class="col-auto">
+                    <span class="text-muted small">ID:</span> <span id="bot-id">Loading...</span>
+                </div>
+                <div class="col-auto">
+                    <span class="text-muted small">Servers:</span> <span id="guild-count">Loading...</span>
+                </div>
+                <div class="col-auto">
+                    <span class="text-muted small">Friends:</span> <span id="bot-friends">0</span>
+                </div>
+                <div class="col-auto">
+                    <span class="text-muted small">DMs:</span> <span id="bot-dms">0</span>
+                </div>
+            </div>
+            <div class="row mt-2 g-2 justify-content-center">
+                <div class="col-auto">
+                    <span class="text-muted small">Nitro:</span> <span id="bot-nitro" class="badge bg-secondary">No</span>
+                </div>
+                <div class="col-auto">
+                    <span class="text-muted small">Created:</span> <span id="bot-created">-</span>
+                </div>
+                <div class="col-auto">
+                    <span class="text-muted small">Status:</span> <span id="bot-status" class="badge rounded-pill px-3 py-2 me-2 bg-warning text-dark status-badge" style="cursor:pointer;user-select:none;" onclick="toggleStatusDropdown()">Loading...</span>
+                    <div id="status-dropdown" class="dropdown-menu" style="min-width:120px;display:none;position:absolute;top:110%;right:0;"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Bank Management Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0" style="color:var(--primary-color)"><i class="bi bi-bank2 me-2"></i>Bank Management</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <label class="form-label">Select Bank</label>
+                    <select id="bank-selector" class="form-select bank-select">
+                        <option value="">Loading banks...</option>
+                    </select>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Bank Name</label>
+                            <div class="editable-field" id="bank-name" style="background:#fff0f6;cursor:default;">Select a bank first</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Account Number</label>
+                            <div id="account-number-container">
+                                <div class="editable-field" id="account-number" onclick="editField('account-number')">
+                                    <i class="bi bi-pencil-square me-2"></i><span id="account-number-text">Click to edit</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label">Account Name</label>
+                            <div id="account-name-container">
+                                <div class="editable-field" id="account-name" onclick="editField('account-name')">
+                                    <i class="bi bi-pencil-square me-2"></i><span id="account-name-text">Click to edit</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Status Config Card -->
+        <div class="card mb-4">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="mb-0" style="color:var(--primary-color)"><i class="bi bi-pencil-square me-2"></i>Status Config</h5>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="status-onoff">
+                    <label class="form-check-label ms-2" for="status-onoff" id="status-onoff-label">OFF</label>
+                </div>
+            </div>
+            <div class="card-body">
+                <form id="status-config-form" autocomplete="off">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label">App Name</label>
+                            <input type="text" class="form-control status-edit" id="status-app_name" name="app_name" placeholder="Tên ứng dụng...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Type</label>
+                            <select class="form-select status-edit" id="status-type" name="type">
+                                <option value="PLAYING">PLAYING</option>
+                                <option value="STREAMING">STREAMING</option>
+                                <option value="LISTENING">LISTENING</option>
+                                <option value="WATCHING">WATCHING</option>
+                                <option value="COMPETING">COMPETING</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Large Image</label>
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control status-edit" id="status-large_image" name="large_image" placeholder="URL ảnh lớn...">
+                                <button class="btn btn-outline-pink" type="button" id="upload-large-image" title="Upload ảnh từ máy"><i class="bi bi-upload"></i></button>
+                            </div>
+                            <div id="preview-large-image" class="mb-2"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Small Image</label>
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control status-edit" id="status-small_image" name="small_image" placeholder="URL ảnh nhỏ...">
+                                <button class="btn btn-outline-pink" type="button" id="upload-small-image" title="Upload ảnh từ máy"><i class="bi bi-upload"></i></button>
+                            </div>
+                            <div id="preview-small-image" class="mb-2"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Details</label>
+                            <input type="text" class="form-control status-edit" id="status-details" name="details" placeholder="Chi tiết...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Timestamp <span class="text-muted" style="font-size:0.9em">(true/false/số giây)</span></label>
+                            <input type="text" class="form-control status-edit" id="status-timestamp" name="timestamp" placeholder="true, false hoặc số giây...">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let bankData = { accounts: {} };
+        let banksList = [];
+        let currentBankId = null;
+        let userId = null; // Store Discord userId
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 1800);
+        }
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleString();
+        }
+        async function fetchBotInfo() {
+            try {
+                const response = await fetch('/api/bot-info');
+                const data = await response.json();
+                document.getElementById('bot-username').textContent = data.username;
+                document.getElementById('bot-id').textContent = data.id;
+                document.getElementById('guild-count').textContent = data.guilds;
+                // Tag logic
+                if (data.discriminator && data.discriminator !== '0') {
+                    document.getElementById('bot-tag').textContent = '#' + data.discriminator;
+                } else {
+                    document.getElementById('bot-tag').textContent = '';
+                }
+                document.getElementById('bot-avatar').src = data.avatar || '';
+                document.getElementById('bot-friends').textContent = data.friends ?? 0;
+                document.getElementById('bot-dms').textContent = data.dms ?? 0;
+                document.getElementById('bot-nitro').textContent = (data.nitro === 1 || data.nitro === 2) ? 'Yes' : 'No';
+                document.getElementById('bot-nitro').className = (data.nitro === 1 || data.nitro === 2) ? 'badge bg-success' : 'badge bg-secondary';
+                document.getElementById('bot-created').textContent = formatDate(data.createdAt);
+                // Custom status
+                if (data.customStatus) {
+                    document.getElementById('bot-custom-status').style.display = '';
+                    document.getElementById('bot-custom-status').textContent = data.customStatus;
+                } else {
+                    document.getElementById('bot-custom-status').style.display = 'none';
+                }
+                setStatusBadge(data.status);
+                document.getElementById('status-selector')?.remove();
+                userId = data.id;
+            } catch (error) {
+                console.error('Error fetching bot info:', error);
+            }
+        }
+        async function fetchBankData() {
+            try {
+                const response = await fetch('/api/bank');
+                bankData = await response.json();
+                if (!bankData.accounts) {
+                    bankData.accounts = {};
+                }
+                updateBankInfo();
+            } catch (error) {
+                console.error('Error fetching bank data:', error);
+            }
+        }
+        async function fetchBanksList() {
+            try {
+                const response = await fetch('/api/banks');
+                banksList = await response.json();
+                updateBankSelector();
+            } catch (error) {
+                console.error('Error fetching banks list:', error);
+            }
+        }
+        function updateBankSelector() {
+            const selector = document.getElementById('bank-selector');
+            selector.innerHTML = '<option value="">Select a bank</option>';
+            banksList.forEach(bank => {
+                const option = document.createElement('option');
+                option.value = bank.id;
+                option.textContent = `${bank.name} (${bank.code})`;
+                selector.appendChild(option);
+            });
+            if (userId && bankData.accounts[userId]) {
+                selector.value = bankData.accounts[userId].bankId;
+                currentBankId = bankData.accounts[userId].bankId;
+                updateBankInfo();
+            }
+        }
+        function updateBankInfo() {
+            if (!currentBankId) return;
+            const bank = banksList.find(b => b.id === currentBankId);
+            if (!bank) return;
+            document.getElementById('bank-name').textContent = bank.name;
+            if (userId && bankData.accounts[userId]) {
+                const account = bankData.accounts[userId];
+                document.getElementById('account-number-text').textContent = account.accountNumber || 'Click to edit';
+                document.getElementById('account-name-text').textContent = account.accountName || 'Click to edit';
+            } else {
+                document.getElementById('account-number-text').textContent = 'Click to edit';
+                document.getElementById('account-name-text').textContent = 'Click to edit';
+            }
+        }
+        async function saveBankData() {
+            try {
+                const response = await fetch('/api/bank', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', },
+                    body: JSON.stringify(bankData),
+                });
+                if (response.ok) {
+                    showToast('Đã lưu thành công!');
+                }
+            } catch (error) {
+                console.error('Error saving bank data:', error);
+            }
+        }
+        // Status dropdown logic
+        let statusDropdownVisible = false;
+        function toggleStatusDropdown() {
+            const dropdown = document.getElementById('status-dropdown');
+            statusDropdownVisible = !statusDropdownVisible;
+            dropdown.style.display = statusDropdownVisible ? 'block' : 'none';
+        }
+        document.addEventListener('click', function(e) {
+            const statusBadge = document.getElementById('bot-status');
+            const dropdown = document.getElementById('status-dropdown');
+            if (!statusBadge.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+                statusDropdownVisible = false;
+            }
+        });
+        function setStatusBadge(status) {
+            const statusElement = document.getElementById('bot-status');
+            let badgeClass = 'badge rounded-pill px-3 py-2 me-2 status-badge ';
+            let text = status;
+            if (status === 'online') {
+                badgeClass += 'bg-success';
+                text = 'Online';
+            } else if (status === 'idle') {
+                badgeClass += 'bg-warning text-dark';
+                text = 'Idle';
+            } else if (status === 'dnd') {
+                badgeClass += 'bg-danger';
+                text = 'Do Not Disturb';
+            } else if (status === 'invisible') {
+                badgeClass += 'bg-secondary';
+                text = 'Invisible';
+            }
+            statusElement.className = badgeClass;
+            statusElement.textContent = text;
+        }
+        async function changeStatus(newStatus) {
+            try {
+                const response = await fetch('/api/change-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', },
+                    body: JSON.stringify({ status: newStatus }),
+                });
+                const data = await response.json();
+                if (data.success) {
+                    setStatusBadge(newStatus);
+                }
+            } catch (error) {
+                console.error('Error changing status:', error);
+            }
+            document.getElementById('status-dropdown').style.display = 'none';
+            statusDropdownVisible = false;
+        }
+        // Handle bank selection
+        document.getElementById('bank-selector').addEventListener('change', async (e) => {
+            currentBankId = parseInt(e.target.value);
+            if (!currentBankId || !userId) return;
+            const bank = banksList.find(b => b.id === currentBankId);
+            if (!bankData.accounts[userId]) {
+                bankData.accounts[userId] = {
+                    bankId: bank.id,
+                    bankCode: bank.code,
+                    bankName: bank.shortName,
+                    accountNumber: '',
+                    accountName: ''
+                };
+            } else {
+                bankData.accounts[userId].bankId = bank.id;
+                bankData.accounts[userId].bankCode = bank.code;
+                bankData.accounts[userId].bankName = bank.shortName;
+            }
+            await saveBankData();
+            updateBankInfo();
+        });
+        // Inline edit logic
+        function editField(fieldId) {
+            if (!userId) return;
+            const container = document.getElementById(fieldId + '-container');
+            const currentValue = document.getElementById(fieldId + '-text').textContent;
+            // Create input
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentValue === 'Click to edit' ? '' : currentValue;
+            input.className = 'editable-input';
+            input.autofocus = true;
+            input.addEventListener('blur', async function() {
+                saveInlineEdit(fieldId, input.value, userId);
+            });
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    input.blur();
+                }
+            });
+            // Replace field with input
+            container.innerHTML = '';
+            container.appendChild(input);
+            input.focus();
+        }
+        async function saveInlineEdit(fieldId, value, userId) {
+            if (fieldId === 'account-number') {
+                bankData.accounts[userId].accountNumber = value;
+            } else if (fieldId === 'account-name') {
+                bankData.accounts[userId].accountName = value;
+            }
+            await saveBankData();
+            // Restore field
+            const container = document.getElementById(fieldId + '-container');
+            const div = document.createElement('div');
+            div.className = 'editable-field';
+            div.id = fieldId;
+            div.onclick = function() { editField(fieldId); };
+            div.innerHTML = `<i class="bi bi-pencil-square me-2"></i><span id="${fieldId}-text">${value || 'Click to edit'}</span>`;
+            container.innerHTML = '';
+            container.appendChild(div);
+        }
+        // Status Config logic
+        let statusConfig = {};
+        let statusOn = false;
+        function setStatusConfigForm() {
+            document.getElementById('status-app_name').value = statusConfig.app_name || '';
+            document.getElementById('status-type').value = statusConfig.type || 'PLAYING';
+            document.getElementById('status-large_image').value = statusConfig.large_image || '';
+            document.getElementById('status-small_image').value = statusConfig.small_image || '';
+            document.getElementById('status-details').value = statusConfig.details || '';
+            document.getElementById('status-timestamp').value = statusConfig.timestamp ?? '';
+        }
+        async function fetchStatusConfig() {
+            try {
+                const response = await fetch('/api/status-config');
+                if (!response.ok) throw new Error('API error');
+                statusConfig = await response.json();
+                setStatusConfigForm();
+            } catch (error) {
+                console.error('Error fetching status config:', error);
+            }
+        }
+        async function saveStatusConfigField(field, value) {
+            statusConfig[field] = value;
+            try {
+                const response = await fetch('/api/status-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', },
+                    body: JSON.stringify(statusConfig),
+                });
+                if (response.ok) {
+                    showToast('Đã lưu status config!');
+                    await fetchStatusConfig(); // Refresh form after save
+                    await turnStatusOff();
+                    await turnStatusOn();
+                } else {
+                    console.error('Error saving status config: API error');
+                }
+            } catch (error) {
+                console.error('Error saving status config:', error);
+            }
+        }
+        async function turnStatusOn() {
+            try {
+                const response = await fetch('/api/status-on', { method: 'POST' });
+                if (response.ok) {
+                    statusOn = true;
+                    document.getElementById('status-onoff').checked = true;
+                    document.getElementById('status-onoff-label').textContent = 'ON';
+                    showToast('Đã bật status!');
+                }
+            } catch (error) {
+                showToast('Lỗi bật status!');
+            }
+        }
+        async function turnStatusOff() {
+            try {
+                const response = await fetch('/api/status-off', { method: 'POST' });
+                if (response.ok) {
+                    statusOn = false;
+                    document.getElementById('status-onoff').checked = false;
+                    document.getElementById('status-onoff-label').textContent = 'OFF';
+                    showToast('Đã tắt status!');
+                }
+            } catch (error) {
+                showToast('Lỗi tắt status!');
+            }
+        }
+        function bindStatusConfigEvents() {
+            document.querySelectorAll('.status-edit').forEach(function(input) {
+                input.addEventListener('blur', function(e) {
+                    let val = e.target.value;
+                    if (e.target.name === 'timestamp') {
+                        if (val === 'true') val = true;
+                        else if (val === 'false') val = false;
+                        else if (!isNaN(val) && val !== '') val = Number(val);
+                    }
+                    saveStatusConfigField(e.target.name, val);
+                });
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.target.blur();
+                    }
+                });
+            });
+            // Toggle switch event
+            const toggle = document.getElementById('status-onoff');
+            toggle.addEventListener('change', async function() {
+                if (toggle.checked) {
+                    await turnStatusOn();
+                } else {
+                    await turnStatusOff();
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchStatusConfig().then(bindStatusConfigEvents);
+            // Optionally, check status on load (try to turn on if config exists)
+            // Image upload logic for status config
+            function createImageInput(callback) {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.style.display = 'none';
+                input.addEventListener('change', function(e) {
+                    if (input.files && input.files[0]) {
+                        callback(input.files[0]);
+                    }
+                });
+                document.body.appendChild(input);
+                input.click();
+                setTimeout(() => document.body.removeChild(input), 2000);
+            }
+            async function uploadImage(file, onSuccess) {
+                const formData = new FormData();
+                formData.append('image', file);
+                try {
+                    const response = await fetch('/api/upload-image', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (data.url) {
+                        // Always use absolute URL
+                        const absUrl = window.location.origin + data.url;
+                        onSuccess(absUrl);
+                        showToast('Tải ảnh thành công!');
+                    } else {
+                        showToast('Lỗi tải ảnh!');
+                    }
+                } catch (error) {
+                    showToast('Lỗi tải ảnh!');
+                }
+            }
+            function setImagePreview(inputId, previewId) {
+                const url = document.getElementById(inputId).value;
+                const preview = document.getElementById(previewId);
+                if (url) {
+                    preview.innerHTML = `<img src="${url}" alt="preview" />`;
+                } else {
+                    preview.innerHTML = '';
+                }
+            }
+            // Upload Large Image
+            document.getElementById('upload-large-image').addEventListener('click', function() {
+                createImageInput(function(file) {
+                    uploadImage(file, function(url) {
+                        document.getElementById('status-large_image').value = url;
+                        setImagePreview('status-large_image', 'preview-large-image');
+                        saveStatusConfigField('large_image', url);
+                    });
+                });
+            });
+            // Upload Small Image
+            document.getElementById('upload-small-image').addEventListener('click', function() {
+                createImageInput(function(file) {
+                    uploadImage(file, function(url) {
+                        document.getElementById('status-small_image').value = url;
+                        setImagePreview('status-small_image', 'preview-small-image');
+                        saveStatusConfigField('small_image', url);
+                    });
+                });
+            });
+            // Image preview on input change
+            document.getElementById('status-large_image').addEventListener('input', function() {
+                setImagePreview('status-large_image', 'preview-large-image');
+            });
+            document.getElementById('status-small_image').addEventListener('input', function() {
+                setImagePreview('status-small_image', 'preview-small-image');
+            });
+        });
+        // Fetch data every 5 seconds
+        fetchBotInfo();
+        fetchBankData();
+        fetchBanksList();
+        setInterval(fetchBotInfo, 5000);
+    </script>
+</body>
+</html> 
