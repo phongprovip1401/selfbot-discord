@@ -121,8 +121,8 @@ node index.mjs
 
 - **Nguyễn Thiên Phong**
   - Discord: `phong2079.`
-  - GitHub: [github.com/phong2079](https://github.com/phong2079)
-  - Socials: [guns.lol/phong2079](https://guns.lol/phong2079)
+  - GitHub: [github.com/phongprovip1401](https://github.com/phongprovip1401)
+  - Socials: [thienphong.site](https:/thienphong.site)
 
 ---
 
